@@ -179,7 +179,6 @@ for year in years_available:
     visible = (year == years_available[0])  # seule la première année est visible
 
     s_year = samples[samples["year"] == year]
-    c_year = cruises[cruises["year"] == year]
 
     # --- Trace A : Points d'observation (POINT) ---
     s_points = s_year[
@@ -236,30 +235,6 @@ for year in years_available:
         year_indices.append(trace_index)
         trace_index += 1
 
-    # --- Trace C : Routes de croisière (MULTIPOINT → lignes) ---
-    all_lats_c, all_lons_c = [], []
-    for _, row in c_year.iterrows():
-        wkt_str = str(row.get("footprintWKT", ""))
-        if "MULTIPOINT" in wkt_str or "LINESTRING" in wkt_str:
-            lats, lons = extract_line_coords(wkt_str)
-            all_lats_c.extend(lats)
-            all_lons_c.extend(lons)
-
-    if all_lats_c:
-        fig.add_trace(go.Scattermapbox(
-            lat=all_lats_c,
-            lon=all_lons_c,
-            mode="lines",
-            line=dict(width=1.5, color="rgba(180,180,180,0.55)"),
-            name=f"Routes croisières {year}",
-            hoverinfo="skip",
-            visible=visible,
-            legendgroup=f"year_{year}",
-            showlegend=False,
-        ))
-        year_indices.append(trace_index)
-        trace_index += 1
-
     traces_per_year[year] = year_indices
 
 total_traces = trace_index
@@ -284,6 +259,36 @@ for sp, color in list(color_map.items())[:14]:
     trace_index += 1
 
 # ---------------------------------------------------------------------------
+# 6b. Trace unique : Routes de croisière (toutes années, indépendante du slider)
+# ---------------------------------------------------------------------------
+# Toutes les croisières sont agrégées en UNE SEULE trace.
+# Elle apparaît dans la légende — un clic suffit pour la masquer/afficher.
+# Le slider ne modifie PAS sa visibilité (None dans le tableau des étapes
+# → Plotly laisse la propriété inchangée).
+cruise_trace_index = trace_index
+all_lats_c, all_lons_c = [], []
+for _, row in cruises.iterrows():
+    wkt_str = str(row.get("footprintWKT", ""))
+    if "MULTIPOINT" in wkt_str or "LINESTRING" in wkt_str:
+        lats, lons = extract_line_coords(wkt_str)
+        all_lats_c.extend(lats)
+        all_lons_c.extend(lons)
+
+fig.add_trace(go.Scattermapbox(
+    lat=all_lats_c,
+    lon=all_lons_c,
+    mode="lines",
+    line=dict(width=1.2, color="rgba(180,180,180,0.45)"),
+    name="Routes de croisière",
+    hoverinfo="skip",
+    visible=True,
+    showlegend=True,
+    legendrank=1000,  # apparaît en bas de la légende
+))
+trace_index += 1
+print(f"  → {len(all_lats_c):,} points de croisière (trace unique, togglable via légende)")
+
+# ---------------------------------------------------------------------------
 # 7. Slider années
 # ---------------------------------------------------------------------------
 slider_steps = []
@@ -298,8 +303,11 @@ for year in years_available:
         else:
             visibility.extend([False] * n)
     # Traces de légende : toujours visibles
-    n_legend = trace_index - legend_traces_start
+    n_legend = cruise_trace_index - legend_traces_start
     visibility.extend([True] * n_legend)
+    # Trace de croisière globale : None = le slider ne touche pas sa visibilité,
+    # l'utilisateur peut la toggler via la légende sans que le slider l'écrase.
+    visibility.append(None)
 
     slider_steps.append(dict(
         method="update",
