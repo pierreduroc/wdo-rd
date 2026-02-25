@@ -1,0 +1,82 @@
+Tu es un expert en analyse de données environnementales et en écologie marine. Je te fournis un dataset issu du programme MONICET, qui recense des observations de cétacés dans l’archipel des Açores entre 2009 et 2020. Ce dataset est structuré selon le standard Darwin Core Archive (DwC-A) et se compose de trois fichiers principaux :
+
+1. **event.txt** : Table des événements d’échantillonnage (cruises).
+2. **occurrence.txt** : Table des occurrences d’observations de cétacés.
+3. **extendedmeasurementorfact.txt** : Table des mesures et faits étendus (variables environnementales et comportementales).
+
+### Contexte du dataset
+Ce dataset contient des observations à long terme de cétacés, collectées par des entreprises d’observation de baleines aux Açores. Chaque enregistrement inclut :
+- L’identification taxonomique des espèces observées,
+- Les coordonnées géographiques,
+- Le stade de vie, la taille estimée du groupe,
+- Le comportement observé,
+- Des variables environnementales comme l’état de la mer (échelle de Beaufort) et la visibilité.
+
+Les données sont idéales pour des analyses de biodiversité, de distribution spatiale, d’écologie spatiotemporelle, de conservation marine, et pour des tâches de machine learning (classification, clustering, détection d’anomalies, modélisation spatio-temporelle ou géospatiale).
+
+### Objectif
+Je souhaite que tu m’aides à :
+1. **Présenter chaque fichier** dans un notebook Python (Jupyter) en expliquant sa structure et son rôle.
+2. **Charger et afficher un échantillon** de chaque fichier pour illustrer leur contenu.
+3. **Expliquer le contexte** de chaque fichier et comment ils s’articulent entre eux.
+4. **Proposer des pistes d’analyse** basées sur ces données.
+
+### Fichiers à analyser
+Voici la structure et un exemple de ligne pour chaque fichier :
+
+#### 1. event.txt
+**Structure :**
+   id | type | institutionCode | datasetName | eventID | parentEventID | samplingProtocol | eventDate | minimumDepthInMeters | maximumDepthInMeters | decimalLatitude | decimalLongitude | geodeticDatum | footprintWKT |
+ |----|------|-----------------|-------------|---------|---------------|-------------------|-----------|-----------------------|----------------------|-----------------|------------------|---------------|---------------|
+ | UAc_MONICET_cruise0001 | cruise | UAc | MONICET | UAc_MONICET_cruise0001 |  |  | 2009-01-06T09:15/2009-01-06T12:15 | 0 | 0 | 37.73472 | -25.66444 | EPSG:4326 | MULTIPOINT (-25.66444 37.73472,...)
+
+**Explication attendue :**
+- Ce fichier décrit les événements de collecte (cruises).
+- Chaque ligne représente une sortie en mer, avec des informations temporelles et géographiques.
+
+#### 2. extendedmeasurementorfact.txt
+**Structure :**
+ | id | measurementID | occurrenceID | measurementType | measurementTypeID | measurementValue | measurementValueID | measurementUnit | measurementUnitID |
+ |----|---------------|--------------|-----------------|-------------------|------------------|--------------------|-----------------|-------------------|
+ | UAc_MONICET_cruise0001:encounter00001 | UAc_MONICET_cruise0001:encounter00001_Pm_137119_Beaufort | UAc_MONICET_cruise0001:encounter00001_Pm_137119 | Beaufort wind force | http://vocab.nerc.ac.uk/... | 2 |  | Beaufort scale |  |
+
+**Explication attendue :**
+- Ce fichier contient des mesures environnementales (ex : force du vent) et comportementales (ex : foraging).
+- Chaque ligne est liée à une occurrence spécifique via `occurrenceID`.
+
+#### 3. occurrence.txt
+**Structure :**
+ | id | collectionCode | basisOfRecord | occurrenceID | recordedBy | occurrenceStatus | eventID | scientificNameID | scientificName | scientificNameAuthorship |
+ |----|----------------|---------------|--------------|------------|------------------|---------|------------------|-----------------|--------------------------|
+ | UAc_MONICET_cruise0001:encounter00001 | MONICET | HumanObservation | UAc_MONICET_cruise0001:encounter00001_Pm_137119 | Picos_de_Aventura | present | UAc_MONICET_cruise0001:encounter00001 | urn:lsid:marinespecies.org:taxname:137119 | Physeter macrocephalus | Linnaeus, 1758 |
+
+**Explication attendue :**
+- Ce fichier recense les observations individuelles de cétacés.
+- Chaque ligne correspond à une observation, avec l’espèce, l’observateur, et le lien vers l’événement (`eventID`).
+
+### Instructions pour le notebook
+1. **Chargement des données** :
+   - Utilise pandas pour charger chaque fichier (assume qu’ils sont accessibles via les chemins fournis).
+   - Affiche les 5 premières lignes de chaque DataFrame.
+
+2. **Explication des liens entre fichiers** :
+   - Montre comment `eventID` dans occurrence.txt relie les observations aux événements dans event.txt.
+   - Montre comment `occurrenceID` dans extendedmeasurementorfact.txt relie les mesures aux observations.
+
+3. **Visualisation rapide** :
+   - Propose une carte simple (folium ou matplotlib) pour visualiser la répartition géographique des événements.
+   - Affiche la distribution des espèces observées (scientificName).
+
+4. **Pistes d’analyse** :
+   - Quels types d’analyses (spatiales, temporelles, comportementales) pourraient être menées ?
+   - Quels modèles de machine learning pourraient être appliqués (ex : prédiction de présence d’espèces en fonction des conditions météo) ?
+
+5. **Code Python** :
+   - Fournis le code nécessaire pour réaliser ces étapes, avec des commentaires clairs.
+
+### Format de sortie
+- Un notebook Jupyter bien structuré, avec des cellules Markdown pour les explications et des cellules code pour l’analyse.
+- Des visualisations simples et interprétables.
+- Une section "Prochaines étapes" avec des idées d’analyses approfondies.
+
+Merci de me proposer un notebook prêt à l’emploi, avec des explications accessibles pour un public technique (ingénieur IA/ML).
